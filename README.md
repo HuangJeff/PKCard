@@ -1,2 +1,2 @@
 # PKCard
-It's Test Project
+It's 練習新接龍 Project
