@@ -24,6 +24,10 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * 
 	 */
 	private static final long serialVersionUID = -1685847849234515380L;
+	/** IMG Folder URL */
+	private static final URL url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
+	//private final URL url = this.getClass().getResource("../images/"); //方法二
+	
 	//紙牌的位置
 	private Point point = null;
 	/** 紙牌最後位置 */
@@ -59,8 +63,10 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		//this.setIcon(new ImageIcon("images/rear.gif")); //can't work
 		try {
 			//URL url = this.getClass().getResource("images/");	//找到(資料夾)的物件(因為要用URL，所以要加反鈄線)
-			URL url = this.getClass().getResource("../images/"); //相對路徑
-			this.setIcon(new ImageIcon(new URL(url, "rear.gif")));
+			//URL url = this.getClass().getResource("../images/"); //相對路徑(往上拉成全域變數)
+			//this.setIcon(new ImageIcon(new URL(url, "rear.gif")));
+			
+			this.setIcon(this.getRearImage());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -76,7 +82,12 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * 轉至正面
 	 */
 	public void turnFront() {
-		this.setIcon(new ImageIcon("images/" + name + ".gif"));
+		//this.setIcon(new ImageIcon("images/" + name + ".gif"));
+		try {
+			this.setIcon(this.getImageIcon(name + ".gif"));
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		this.isFront = true;
 	}
 	
@@ -84,7 +95,12 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * 轉至背面
 	 */
 	public void turnRear() {
-		this.setIcon(new ImageIcon("images/rear.gif"));
+		//this.setIcon(new ImageIcon("images/rear.gif"));
+		try {
+			this.setIcon(this.getRearImage());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		this.isFront = false;
 		this.canMove = false;
 	}
@@ -99,6 +115,24 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		this.initPoint = point;
 	}
 	
+	/**
+	 * 取得牌背面圖檔(rear.gif)
+	 * @return
+	 * @throws MalformedURLException 
+	 */
+	private ImageIcon getRearImage() throws MalformedURLException {
+		return this.getImageIcon("rear.gif");
+	}
+	
+	/**
+	 * 取得指定名稱的Image File
+	 * @param fileName : 指定圖檔名稱
+	 * @return
+	 * @throws MalformedURLException 
+	 */
+	private ImageIcon getImageIcon(String fileName) throws MalformedURLException {
+		return new ImageIcon(new URL(url, fileName));
+	}
 	
 	
 	//----------MouseMotionListener----------

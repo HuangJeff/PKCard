@@ -213,40 +213,40 @@ public class Spider extends JFrame {
 		int x = 883;
 		int y = 580;
 		//初始化待展開的紙牌(共60張牌，待展開)
-		/*for(int i=0;i<6;i++) {
+		for(int i=0;i<6;i++) {
 			for(int j=0;j<10;j++) {
 				int _n = i * 10 + j;
 				System.out.println("初始化待展開的紙牌 _n = " + _n);
 				this.pane.add(cards[_n]);
 				//將card轉向背面
 				cards[_n].turnRear();
-				//將card放有固定的位置上(上方白色框內)
+				//將card放有固定的位置上(右下角，發牌區)
 				cards[_n].moveto(new Point(x, y));
 				//將card的位置及相關資訊存入
 				table.put(new Point(x, y), cards[_n]);
 			}
 			//x軸+10
 			x += 10;
-		}*/
+		}
 		x = 20;
 		y = 45;
-		//初始化表面顯示的紙牌
-		for(int i=10;i>5;i--) {
-			for(int j=0;j<10;j++) {
+		//初始化表面顯示的紙牌(上方白色框內)
+		for(int i=10;i>5;i--) { //往下每組各5張牌
+			for(int j=0;j<10;j++) { //往右排10組
 				int _n = i * 10 + j;
 				if(_n >= 104)
 					continue;
-				System.out.println("初始化表面顯示的紙牌 _n = " + _n);
+				//System.out.println("初始化表面顯示的紙牌 _n = " + _n);
 				this.pane.add(cards[_n]);
 				//轉背面
-//				cards[_n].turnRear();
+				cards[_n].turnRear();
 				//移動到固定位置
 				cards[_n].moveto(new Point(x, y));
 				//將card的位置及相關資訊存入
-//				table.put(new Point(x, y), cards[_n]);
-				x += 101;
+				table.put(new Point(x, y), cards[_n]);
+				x += 101; //往右排
 			}
-			x = 20;
+			x = 20; //重設回原點
 			y -= 5;
 		}
 	}
