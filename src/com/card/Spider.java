@@ -42,6 +42,10 @@ public class Spider extends JFrame {
 	public static final int HARD = 1;
 	
 	private Container pane = null;
+	/**
+	 * 建立位置(883, 606)，長寬(121, 96)的區域。<br>
+	 * 會在此區域建立需『被拖曳』的牌組(Event)
+	 */
 	private JLabel clickLagel = null;
 	private JLabel[] groundLabel = null;
 	
@@ -53,6 +57,9 @@ public class Spider extends JFrame {
 	private Hashtable<Point, PKCard> table = null;
 	private int a = 0;
 	private int n = 0;
+	/**
+	 * 記錄右下角牌組張數(6組 * 10(每組) = 60張牌)
+	 */
 	private int c = 0;
 	private int finish = 0;
 	
@@ -111,9 +118,8 @@ public class Spider extends JFrame {
 			this.pane.add(groundLabel[i]);
 		}
 		
-		//this.setVisible(true);
-		
-		
+		this.setVisible(true);
+		this.deal();
 		
 		//addEventListener
 		this.addEventListener();
@@ -126,14 +132,33 @@ public class Spider extends JFrame {
 		clickLagel.addMouseListener(new MouseAdapter() {
 			//鼠標按鈕在元件上釋放時調用。
 			public void mouseReleased(MouseEvent e) {
-				System.out.println("clickLagel --- mouseReleased e = " + e);
+				//System.out.println("clickLagel --- mouseReleased e = " + e);
+				if(Spider.this.c < 60) { //右下角牌組尚未發完(c < 60)
+					Spider.this.deal();
+				}
 			}
 		});
 		
 		this.addKeyListener(new KeyAdapter() {
+			class Show extends Thread {
+				@Override
+				public void run() {
+					Spider.this.showEnableOperator();
+				}
+			}
 			
 			public void keyPressed(KeyEvent e) {
-				
+				System.out.println("this.addKeyListener --- keyPressed finish = " + Spider.this.finish);
+				if(Spider.this.finish != 8) {
+					System.out.println("this.addKeyListener --- e.getKeyCode() = " + e.getKeyCode() +
+							" this.c = " + Spider.this.c);
+					if(e.getKeyCode() == KeyEvent.VK_D && Spider.this.c < 60) { //右下角牌組尚未發完(c < 60)
+						Spider.this.deal();
+					} else if(e.getKeyCode() == KeyEvent.VK_M) {
+						//按 M 鍵，提示使用都可以移動之牌
+						new Show().start();
+					}
+				}
 			}
 		});
 		
@@ -177,8 +202,8 @@ public class Spider extends JFrame {
 			}
 		}
 		
-		//隨機紙牌初始化 TODO 先Mark，之後要開
-		//this.randomCards();
+		//隨機紙牌初始化
+		this.randomCards();
 	}
 	
 	/**
@@ -212,11 +237,11 @@ public class Spider extends JFrame {
 		
 		int x = 883;
 		int y = 580;
-		//初始化待展開的紙牌(共60張牌，待展開)
+		//初始化待展開的紙牌(共60張牌，待展開，右下角)
 		for(int i=0;i<6;i++) {
 			for(int j=0;j<10;j++) {
 				int _n = i * 10 + j;
-				System.out.println("初始化待展開的紙牌 _n = " + _n);
+				//System.out.println("初始化待展開的紙牌 _n = " + _n);
 				this.pane.add(cards[_n]);
 				//將card轉向背面
 				cards[_n].turnRear();
@@ -254,7 +279,7 @@ public class Spider extends JFrame {
 	/**
 	 * 設置還原
 	 */
-	private void setNA() {
+	public void setNA() {
 		this.a = 0;
 		this.n = 0;
 	}
@@ -273,9 +298,10 @@ public class Spider extends JFrame {
 			}
 		}
 		int x = 20;
-		
-		for(int i=0;i<10;) {
+		//處理10組牌的最後一張牌(轉正面、設定可移動、判斷若為1是否結束)
+		for(int i=0;i<10;i++) {
 			Point lastPoint = this.getLastCardLocation(i);
+			PKCard lastCard = cards[c + i];
 			//這張牌應"背面向上"
 			if(c == 0) {
 				lastPoint.y += 5;
@@ -284,10 +310,31 @@ public class Spider extends JFrame {
 				lastPoint.y += 20;
 			}
 			
-			table.remove(cards[c + i].getLocation());
-			//cards[c + i]
+			table.remove(lastCard.getLocation());
+			lastCard.moveto(lastPoint);
+			table.put(lastPoint, lastCard);
+			lastCard.turnFront();
+			lastCard.setCanMove(true);
 			
+			//將元件card移動到容器中指定的順序索引
+			/* setComponentZOrder()
+			 * 將指定元件移動到容器中指定的 z 順序索引。
+			 * z 順序確定了繪製元件的順序；具有最高 z 順序的元件將第一個繪製，而具有最低 z 順序的元件將最後一個繪製。
+			 */
+			this.pane.setComponentZOrder(lastCard, 1);
+			
+			Point point = new Point(lastPoint);
+			if(lastCard.getCardValue() == 1) { //如果最後一張牌是1
+				int _n = lastCard.whichColumnAvailable(point);
+				point.y -= 240;
+				PKCard _card = this.table.get(point);
+				if(_card != null && _card.isCardCanMove()) {
+					this.haveFinish(_n); //判斷是否結束(因為最後一張牌是1)
+				}
+			}
+			x += 101;
 		}
+		c += 10; //右下角牌組，每次送出10張牌出來，故 c += 10
 	}
 	
 	/**
@@ -296,7 +343,7 @@ public class Spider extends JFrame {
 	 * @param column
 	 * @return
 	 */
-	private Point getLastCardLocation(int column) {
+	public Point getLastCardLocation(int column) {
 		Point point = new Point(20 + column * 101, 25);
 		PKCard card = (PKCard)this.table.get(point);
 		if(card == null)
@@ -309,11 +356,28 @@ public class Spider extends JFrame {
 	}
 	
 	/**
-	 * 取得card下面的一張牌
+	 * 取得傳入牌(card)的前一張牌
 	 * @param card
 	 * @return
 	 */
-	private PKCard getNextCard(PKCard card) {
+	public PKCard getPreviousCard(PKCard card) {
+		Point point = new Point(card.getLocation());
+		point.y -= 5;
+		card = table.get(point);
+		if(card != null) {
+			return card;
+		}
+		point.y -= 15;
+		card = table.get(point);
+		return card;
+	}
+	
+	/**
+	 * 取得傳入牌(card)的下一張牌
+	 * @param card
+	 * @return
+	 */
+	public PKCard getNextCard(PKCard card) {
 		Point point = new Point(card.getLocation());
 		point.y += 5;
 		card = (PKCard)this.table.get(point);
@@ -322,6 +386,131 @@ public class Spider extends JFrame {
 		point.y += 15;
 		card = (PKCard)this.table.get(point);
 		return card;
+	}
+	
+	/**
+	 * 顯示(提示)可移動的操作<br>
+	 * 提示操作者那張牌可以移動。
+	 */
+	private void showEnableOperator() {
+		int _x = 0;
+		out: while(true) {
+			Point point = null;
+			PKCard _card = null;
+			do {
+				if(point != null) {
+					this.n++;
+				}
+				point = this.getLastCardLocation(n);
+				while(point == null) {
+					point = this.getLastCardLocation(++n);
+					if(this.n == 10)
+						this.n = 0;
+					_x++;
+					if(_x == 10)
+						break out;
+				}
+				_card = this.table.get(point);
+			} while(!_card.isCardCanMove());
+			//取得前一張可以移動的牌
+			while(this.getPreviousCard(_card) != null &&
+					this.getPreviousCard(_card).isCardCanMove())
+			{
+				_card = this.getPreviousCard(_card);
+			}
+			if(this.a == 10) {
+				this.a = 0;
+			}
+			
+			for(;this.a < 10;this.a++) {
+				if(this.a != this.n) {
+					Point _p = null;
+					PKCard _c = null;
+					do {
+						if(_p != null) {
+							this.a++;
+						}
+						_p = this.getLastCardLocation(a);
+						int _z = 0;
+						while(_p == null) {
+							_p = this.getLastCardLocation(++a);
+							if(this.a == 10)
+								this.a = 0;
+							if(this.a == this.n)
+								this.a++;
+							_z++;
+							if(_z == 10)
+								break out;
+						}
+						_c = this.table.get(_p);
+					} while(!_c.isCardCanMove());
+					if(_c.getCardValue() == _card.getCardValue() + 1)
+					{
+						_card.flashCard(_card);
+						try {
+							Thread.sleep(800);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						_c.flashCard(_c);
+						this.a++;
+						if(this.a == 10) {
+							this.n++;
+						}
+						break out;
+					}
+				}
+			}
+			this.n++;
+			if(this.n == 10) {
+				this.n = 0;
+			}
+			_x++;
+			if(_x == 10) {
+				break out;
+			}
+		}
+	}
+	
+	/**
+	 * 取得groundLabel(桌面上的框框(紙牌放置處)) Location
+	 * @param column
+	 * @return
+	 */
+	public Point getGroundLabelLocation(int column) {
+		return new Point(this.groundLabel[column].getLocation());
+	}
+	
+	/**
+	 * 判斷紙牌的擺放是否完成(那一列)
+	 * @param column : 那一列
+	 */
+	private void haveFinish(int column) {
+		Point point = this.getLastCardLocation(column);
+		PKCard _card = this.table.get(point);
+		do {
+			this.table.remove(point);
+			_card.moveto(new Point(20 + finish * 10, 580));
+			//將元件移動到容器中指定的順序索引
+			this.pane.setComponentZOrder(_card, 1);
+			//將紙牌新的相關資訊存入Hashtable
+			this.table.put(_card.getLocation(), _card);
+			_card.setCanMove(false);
+			point = this.getLastCardLocation(column);
+			if(point == null)
+				_card = null;
+			else
+				_card = this.table.get(point);
+		} while(_card != null && _card.isCardCanMove());
+		finish++;
+		//如果8付牌全部組合成功，則顯示成功的對話方塊
+		if(finish == 8) {
+			JOptionPane.showMessageDialog(this, "恭喜你，順利過關！", "成功", JOptionPane.PLAIN_MESSAGE);
+		}
+		if(_card != null) {
+			_card.turnFront();
+			_card.setCanMove(true);
+		}
 	}
 	
 	/**

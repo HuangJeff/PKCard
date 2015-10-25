@@ -37,11 +37,12 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	private int type = 0;
 	
 	private String name = null;
-	
+	/** 前一張牌 */
 	private PKCard previousCard = null;
 	private Container pane = null;
+	/** Spider 主程式 */
 	private Spider main = null;
-	
+	/** 是否可以移動 */
 	private boolean canMove = false;
 	/** 是否為正面 */
 	private boolean isFront = false;
@@ -116,12 +117,89 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	}
 	
 	/**
+	 * 判斷牌是否能移動
+	 * @param can
+	 */
+	public void setCanMove(boolean can) {
+		this.canMove = can;
+		PKCard prevCard = main.getPreviousCard(this);
+		if(prevCard != null && prevCard.isCardFront()) {
+			if(!can) {
+				if(!prevCard.isCardCanMove()) {
+					return;
+				} else {
+					prevCard.setCanMove(can);
+				}
+			} else {
+				if((this.value + 1) == prevCard.getCardValue() &&
+						this.type == prevCard.getCardType())
+				{
+					prevCard.setCanMove(can);
+				} else {
+					prevCard.setCanMove(false);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 判斷可用列
+	 * @param point
+	 * @return
+	 */
+	public int whichColumnAvailable(Point point) {
+		int _x = point.x;
+		int _y = point.y;
+		int _a = (_x - 20) / 101;
+		int _b = (_x - 20) % 101;
+		if(_a != 9) {
+			if(_b > 30 && _b <= 71) {
+				_a = -1;
+			} else if(_b > 71) {
+				_a++;
+			}
+		} else if(_b > 71) {
+			_a = -1;
+		}
+		
+		if(_a != -1) {
+			Point _p = this.main.getLastCardLocation(_a);
+			if(_p == null)
+				this.main.getGroundLabelLocation(_a);
+			_b = _y - _p.y;
+			if(_b <= -96 || _b >= 96) {
+				_a = -1;
+			}
+		}
+		return _a;
+	}
+	
+	
+	public void flashCard(PKCard card) {
+		//啟動Flash程序
+		new Flash(card).start();
+		//不停的獾得下一張牌，直到完成
+		if(this.main.getNextCard(card) != null) {
+			card.flashCard(this.main.getNextCard(card));
+		}
+	}
+	
+	/**
 	 * 取得牌背面圖檔(rear.gif)
 	 * @return
 	 * @throws MalformedURLException 
 	 */
 	private ImageIcon getRearImage() throws MalformedURLException {
 		return this.getImageIcon("rear.gif");
+	}
+	
+	/**
+	 * 取得白色牌圖檔(white.gif)
+	 * @return
+	 * @throws MalformedURLException 
+	 */
+	private ImageIcon getWhiteImage() throws MalformedURLException {
+		return this.getImageIcon("white.gif");
 	}
 	
 	/**
@@ -134,6 +212,37 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		return new ImageIcon(new URL(url, fileName));
 	}
 	
+	/**
+	 * 是否為正面
+	 * @return
+	 */
+	public boolean isCardFront() {
+		return this.isFront;
+	}
+	
+	/**
+	 * 是否能移動
+	 * @return
+	 */
+	public boolean isCardCanMove() {
+		return this.canMove;
+	}
+	
+	/**
+	 * 取得牌面數值
+	 * @return
+	 */
+	public int getCardValue() {
+		return this.value;
+	}
+	
+	/**
+	 * 取得牌面類型
+	 * @return
+	 */
+	public int getCardType() {
+		return this.type;
+	}
 	
 	//----------MouseMotionListener----------
 	@Override
@@ -151,10 +260,15 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	public void mouseClicked(MouseEvent e) {
 		
 	}
-
+	
+	/**
+	 * 點擊滑鼠
+	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
-		
+		Point _p = e.getPoint();
+		this.main.setNA();
+		this.previousCard = this.main.getPreviousCard(this);
 	}
 
 	@Override
@@ -171,5 +285,49 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	public void mouseExited(MouseEvent e) {
 		
 	}
-
+	
+	
+	class Flash extends Thread {
+		private PKCard card = null;
+		
+		/**
+		 * Constructor
+		 * @param card
+		 */
+		public Flash(PKCard card) {
+			this.card = card;
+		}
+		
+		/**
+		 * 為紙牌的正面設置白色圖片
+		 */
+		@Override
+		public void run() {
+			boolean is = false;
+			ImageIcon whiteIcon = null;
+			try {
+				//白色圖片
+				whiteIcon = this.card.getWhiteImage();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+			for(int i = 0;i < 4;i++) {
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				if(is) {
+					this.card.turnFront();
+					is = !is;
+				} else {
+					this.card.setIcon(whiteIcon);
+					is = !is;
+				}
+				//根據現在外觀將card的UI屬性重置
+				this.card.updateUI();
+			}
+		}
+	}
 }
