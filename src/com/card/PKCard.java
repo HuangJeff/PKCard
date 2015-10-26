@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Hashtable;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -117,6 +118,32 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	}
 	
 	/**
+	 * 移動至坐標(x, y)
+	 * @param x
+	 * @param y
+	 */
+	private void moving(int x, int y) {
+		PKCard _nextCard = this.main.getNextCard(this);
+		Point _p = this.getLocation();
+		
+		//將元件移動至容器中指定的順序位置
+		this.pane.setComponentZOrder(this, 1);
+		
+		//在Hashtable中保存新的節點資訊
+		//重新設定此張牌的位置(並更新Spider.java中的table變數)
+		Hashtable<Point, PKCard> _main = this.main.getTable();
+		_main.remove(_p);
+		_p.x += x;
+		_p.y += y;
+		this.setLocation(_p);
+		_main.put(_p, this);
+		this.main.setTable(_main);
+		
+		if(_nextCard != null)
+			_nextCard.moving(x, y);
+	}
+	
+	/**
 	 * 判斷牌是否能移動
 	 * @param can
 	 */
@@ -185,6 +212,43 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	}
 	
 	/**
+	 * 放置紙牌
+	 * @param point
+	 */
+	private void setNextCardLocation(Point point) {
+		PKCard _card = this.main.getNextCard(this);
+		if(_card != null) {
+			if(point == null) {
+				_card.setNextCardLocation(null);
+				//重新設定此張牌的位置(並更新Spider.java中的table變數)
+				Hashtable<Point, PKCard> _main = this.main.getTable();
+				_main.remove(_card.getLocation());
+				
+				_card.setLocation(_card.initPoint);
+				_main.put(_card.initPoint, _card);
+				
+				this.main.setTable(_main);
+			} else {
+				point = new Point(point);
+				point.y += 20;
+				_card.setNextCardLocation(point);
+				point.y -= 20;
+				
+				//重新設定此張牌的位置(並更新Spider.java中的table變數)
+				Hashtable<Point, PKCard> _main = this.main.getTable();
+				_main.remove(_card.getLocation());
+				
+				_card.setLocation(point);
+				_main.put(_card.getLocation(), _card);
+				
+				this.main.setTable(_main);
+				
+				_card.initPoint = _card.getLocation();
+			}
+		}
+	}
+	
+	/**
 	 * 取得牌背面圖檔(rear.gif)
 	 * @return
 	 * @throws MalformedURLException 
@@ -245,9 +309,19 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	}
 	
 	//----------MouseMotionListener----------
+	/**
+	 * 滑鼠拖曳紙牌
+	 */
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		
+		if(this.canMove) {
+			int _x = 0;
+			int _y = 0;
+			Point _p = e.getPoint();
+			_x = _p.x - this.point.x;
+			_y = _p.y - this.point.y;
+			this.moving(_x, _y);
+		}
 	}
 
 	@Override
@@ -266,14 +340,87 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
-		Point _p = e.getPoint();
+		this.point = e.getPoint();
 		this.main.setNA();
 		this.previousCard = this.main.getPreviousCard(this);
 	}
-
+	
+	/**
+	 * 釋放滑鼠<br>
+	 * 當點擊釋放滑鼠於放置牌的十個白色框框(JLabel[在Spider中有宣告成變數：groundLabel])時，
+	 * 
+	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		//取得滑鼠釋放的位置(十個白色框框)
+		Point _p = ((JLabel)e.getSource()).getLocation();
+		//判斷可用列
+		int _n = this.whichColumnAvailable(_p);
+		System.out.println("-判斷可用列-_n = " + _n +
+				" initPoint的可用列 = " + this.whichColumnAvailable(this.initPoint));
+		if(_n == -1 || _n == this.whichColumnAvailable(this.initPoint)) {
+			this.setNextCardLocation(null);
+			
+			//重新設定此張牌的位置(並更新Spider.java中的table變數)
+			Hashtable<Point, PKCard> _main = this.main.getTable();
+			_main.remove(this.getLocation());
+			
+			this.setLocation(this.initPoint);
+			_main.put(this.initPoint, this);
+			
+			this.main.setTable(_main);
+			return;
+		}
 		
+		_p = this.main.getLastCardLocation(_n);
+		boolean isEmpty = false;
+		PKCard _card = null;
+		if(_p == null) {
+			_p = this.main.getGroundLabelLocation(_n);
+			isEmpty = true;
+		} else {
+			_card = this.main.getTable().get(_p);
+		}
+		
+		if(isEmpty || ((this.value + 1) == _card.getCardValue())) {
+			_p.y += 40;
+			if(isEmpty)
+				_p.y -= 20;
+			this.setNextCardLocation(_p);
+			
+			//重新設定此張牌的位置(並更新Spider.java中的table變數)
+			Hashtable<Point, PKCard> _main = this.main.getTable();
+			_main.remove(this.getLocation());
+			_p.y -= 20;
+			this.setLocation(_p);
+			_main.put(_p, this);
+			this.main.setTable(_main);
+			
+			this.initPoint = _p;
+			if(this.previousCard != null) {
+				this.previousCard.turnFront();
+				this.previousCard.setCanMove(true);
+			}
+			this.setCanMove(true);
+		} else {
+			this.setNextCardLocation(null);
+			//重新設定此張牌的位置(並更新Spider.java中的table變數)
+			Hashtable<Point, PKCard> _main = this.main.getTable();
+			_main.remove(this.getLocation());
+			this.setLocation(this.initPoint);
+			_main.put(this.initPoint, this);
+			this.main.setTable(_main);
+			return;
+		}
+		_p = this.main.getLastCardLocation(_n);
+		_card = this.main.getTable().get(_p);
+		if(_card.getCardValue() == 1) {
+			_p.y -= 240;
+			_card = this.main.getTable().get(_p);
+			if(_card != null && _card.isCardCanMove()) {
+				this.main.haveFinish(_n);
+			}
+		}
 	}
 
 	@Override

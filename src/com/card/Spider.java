@@ -485,7 +485,7 @@ public class Spider extends JFrame {
 	 * 判斷紙牌的擺放是否完成(那一列)
 	 * @param column : 那一列
 	 */
-	private void haveFinish(int column) {
+	public void haveFinish(int column) {
 		Point point = this.getLastCardLocation(column);
 		PKCard _card = this.table.get(point);
 		do {
@@ -511,6 +511,22 @@ public class Spider extends JFrame {
 			_card.turnFront();
 			_card.setCanMove(true);
 		}
+	}
+	
+	/**
+	 * 紙牌的位置資訊及紙牌本身資訊
+	 * @return
+	 */
+	public Hashtable<Point, PKCard> getTable() {
+		return table;
+	}
+	
+	/**
+	 * 紙牌的位置資訊及紙牌本身資訊
+	 * @param table
+	 */
+	public void setTable(Hashtable<Point, PKCard> table) {
+		this.table = table;
 	}
 	
 	/**
