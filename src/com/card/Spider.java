@@ -51,6 +51,8 @@ public class Spider extends JFrame {
 	
 	//生成紙牌陣列
 	private PKCard[] cards = null;
+	//牌組花色
+	private int cardPicture = 0;
 	//初始難度
 	private int grade = 0;
 	
@@ -161,13 +163,22 @@ public class Spider extends JFrame {
 				}
 			}
 		});
-		
+	}
+	
+	/**
+	 * 開始新遊戲
+	 */
+	public void newGame() {
+		this.randomCards();
+		this.setCardsLocation();
+		this.setGroundLabelZOrder();
+		this.deal();
 	}
 	
 	/**
 	 * 紙牌初始化
 	 */
-	private void initCards() {
+	public void initCards() {
 		//如果是空的，初始化
 		if(cards == null)
 			cards = new PKCard[104]; //撲克牌52張(104 = 52 * 2)
@@ -287,7 +298,7 @@ public class Spider extends JFrame {
 	/**
 	 * 遊戲建立
 	 */
-	private void deal() {
+	public void deal() {
 		this.setNA();
 		//判斷10列中是否空列
 		for(int i=0;i<10;i++) {
@@ -392,7 +403,7 @@ public class Spider extends JFrame {
 	 * 顯示(提示)可移動的操作<br>
 	 * 提示操作者那張牌可以移動。
 	 */
-	private void showEnableOperator() {
+	public void showEnableOperator() {
 		int _x = 0;
 		out: while(true) {
 			Point point = null;
@@ -482,6 +493,20 @@ public class Spider extends JFrame {
 	}
 	
 	/**
+	 * 收置groundLable組件
+	 */
+	private void setGroundLabelZOrder() {
+		for(int i=0;i<10;i++) {
+			/*
+			 * 將元件:groundLabel移動到容器中指定的順序索引。順序(105+i)確定了繪製
+			 * 元件的順序；具有最高順序的元件將第一個繪製，而具有最低順序的元件將最後一個
+			 * 繪製。在元件重疊的地方，具有較低順序的元件將覆蓋具有較高順序的元件。
+			 */
+			this.pane.setComponentZOrder(groundLabel[i], i);
+		}
+	}
+	
+	/**
 	 * 判斷紙牌的擺放是否完成(那一列)
 	 * @param column : 那一列
 	 */
@@ -527,6 +552,37 @@ public class Spider extends JFrame {
 	 */
 	public void setTable(Hashtable<Point, PKCard> table) {
 		this.table = table;
+	}
+	
+	/**
+	 * 牌組花色
+	 * @return
+	 */
+	public int getCardPicture() {
+		return cardPicture;
+	}
+	/**
+	 * 牌組花色
+	 * @param cardPicture
+	 */
+	public void setCardPicture(int cardPicture) {
+		this.cardPicture = cardPicture;
+	}
+	
+	/**
+	 * 右下角紙牌的數量
+	 * @return
+	 */
+	public int getC() {
+		return this.c;
+	}
+	
+	/**
+	 * 設置等級
+	 * @param grade
+	 */
+	public void setGrade(int grade) {
+		this.grade = grade;
 	}
 	
 	/**

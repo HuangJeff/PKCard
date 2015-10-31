@@ -26,8 +26,15 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 */
 	private static final long serialVersionUID = -1685847849234515380L;
 	/** IMG Folder URL */
-	private static final URL url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
+	private URL url;
+	//private static URL url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
 	//private final URL url = this.getClass().getResource("../images/"); //方法二
+	/** 實體檔案-牌卡背面檔名(rear.gif/rear.png) */
+	private String rearCardName = "rear";
+	/** 實體檔案-牌卡背面檔名(white.gif/white.png) */
+	private String whiteCardName = "white";
+	/** 實體檔案-牌卡的副檔名(*.gif/*.png) */
+	private String cardFileExtension = null;
 	
 	//紙牌的位置
 	private Point point = null;
@@ -61,9 +68,11 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		
 		this.name = name;
 		this.main = spider;
+		this.pane = this.main.getContentPane();
 		//default Picture
 		//this.setIcon(new ImageIcon("images/rear.gif")); //can't work
 		try {
+			this.switchCardPicture();
 			//URL url = this.getClass().getResource("images/");	//找到(資料夾)的物件(因為要用URL，所以要加反鈄線)
 			//URL url = this.getClass().getResource("../images/"); //相對路徑(往上拉成全域變數)
 			//this.setIcon(new ImageIcon(new URL(url, "rear.gif")));
@@ -81,12 +90,31 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	}
 	
 	/**
+	 * 切換牌組(不同花色)
+	 * @param cardPic
+	 */
+	private void switchCardPicture() {
+		int cardPic = this.main.getCardPicture();
+		//先決定牌組圖片路徑(default:images內)
+		if(cardPic != 0) {
+			this.url = PKCard.class.getResource("../images_2/");
+			
+			this.cardFileExtension = ".png";
+		} else {
+			this.url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
+			
+			this.cardFileExtension = ".gif";
+		}
+	}
+	
+	/**
 	 * 轉至正面
 	 */
 	public void turnFront() {
 		//this.setIcon(new ImageIcon("images/" + name + ".gif"));
 		try {
-			this.setIcon(this.getImageIcon(name + ".gif"));
+			//this.setIcon(this.getImageIcon(name + ".gif"));
+			this.setIcon(this.getImageIcon(this.name + this.cardFileExtension));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -127,6 +155,12 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		Point _p = this.getLocation();
 		
 		//將元件移動至容器中指定的順序位置
+		/*
+		 * 經測試:[以桌上十組牌為例]，第一組的牌會是第一個繪制的元件，第十組牌會是最後一個繪制。
+		 * 因此在拖曳移動時，第一組牌會在其它牌之下顯示，
+		 * 之後每組牌移動時，會顯示在此組之前的牌之上，但在之後的牌之下。
+		 * setComponentZOrder能確保移動的牌，均能顯示其上(參數:1)
+		 */
 		this.pane.setComponentZOrder(this, 1);
 		
 		//在Hashtable中保存新的節點資訊
@@ -205,7 +239,7 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	public void flashCard(PKCard card) {
 		//啟動Flash程序
 		new Flash(card).start();
-		//不停的獾得下一張牌，直到完成
+		//不停的獲得下一張牌，直到完成
 		if(this.main.getNextCard(card) != null) {
 			card.flashCard(this.main.getNextCard(card));
 		}
@@ -254,7 +288,8 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * @throws MalformedURLException 
 	 */
 	private ImageIcon getRearImage() throws MalformedURLException {
-		return this.getImageIcon("rear.gif");
+		//return this.getImageIcon("rear.gif");
+		return this.getImageIcon(this.rearCardName + this.cardFileExtension);
 	}
 	
 	/**
@@ -263,7 +298,8 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * @throws MalformedURLException 
 	 */
 	private ImageIcon getWhiteImage() throws MalformedURLException {
-		return this.getImageIcon("white.gif");
+		//return this.getImageIcon("white.gif");
+		return this.getImageIcon(this.whiteCardName + this.cardFileExtension);
 	}
 	
 	/**

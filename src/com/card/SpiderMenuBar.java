@@ -115,6 +115,7 @@ public class SpiderMenuBar extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("開局..");
+				main.newGame();
 			}
 		});
 		
@@ -122,7 +123,9 @@ public class SpiderMenuBar extends JMenuBar {
 		jItemPlayAgain.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("重新發牌..");
+				System.out.println("重新發牌..c = " + main.getC());
+				if(main.getC() < 60)
+					main.deal();
 			}
 		});
 		
@@ -131,6 +134,7 @@ public class SpiderMenuBar extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("顯示可行操作..");
+				new Show().start();
 			}
 		});
 		
@@ -155,6 +159,9 @@ public class SpiderMenuBar extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("簡單..");
+				main.setGrade(Spider.EASY);
+				main.initCards();
+				main.newGame();
 			}
 		});
 		
@@ -163,6 +170,9 @@ public class SpiderMenuBar extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("中級..");
+				main.setGrade(Spider.NATURAL);
+				main.initCards();
+				main.newGame();
 			}
 		});
 		
@@ -171,6 +181,9 @@ public class SpiderMenuBar extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("困難..");
+				main.setGrade(Spider.HARD);
+				main.initCards();
+				main.newGame();
 			}
 		});
 		
@@ -178,7 +191,8 @@ public class SpiderMenuBar extends JMenuBar {
 		jItemAbout.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("關於..");
+				//System.out.println("關於..");
+				new AboutDialog(main);
 			}
 		});
 		
@@ -187,19 +201,34 @@ public class SpiderMenuBar extends JMenuBar {
 			@Override
 			public void menuSelected(MenuEvent e) {
 				System.out.println("jNewGame menuSelected");
+				if(main.getC() < 60) {
+					jItemPlayAgain.setEnabled(true);
+				} else {
+					jItemPlayAgain.setEnabled(false);
+				}
 			}
 			
 			@Override
 			public void menuDeselected(MenuEvent e) {
-				System.out.println("jNewGame menuDeselected");
+				//System.out.println("jNewGame menuDeselected");
 			}
 			
 			@Override
 			public void menuCanceled(MenuEvent e) {
-				System.out.println("jNewGame menuCanceled");
+				//System.out.println("jNewGame menuCanceled");
 			}
 		});
 		
 	}
 	
+	/**
+	 * 程序：顯示可以執行的操作
+	 * @author jeff
+	 */
+	private class Show extends Thread {
+		@Override
+		public void run() {
+			main.showEnableOperator();
+		}
+	}
 }
