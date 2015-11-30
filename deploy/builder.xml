@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PKCard Ant" default="start_point" basedir="..">
+	<!-- set global properties for this build -->
+	<property name="ProjectName" value="PKCard"/>
+	
+	<!-- PATH -->
+	<property name="deploy" location="deploy"/>
+	<property name="src" location="src"/>
+	<property name="bin" location="bin"/>
+	<property name="classes" location="classes"/>
+	
+	<!-- FILE -->
+	<property name="ProjectJarFileName" value="${ProjectName}.jar"/>
+	
+	<!-- also need to change the jarsigner info -->
+	<property name="alias" value="jeff"/>
+	<property name="storepass" value="1qaz2wsx"/>
+	<property name="keystore" value="${deploy}/keystore/.myKeys7200"/>
+	<property name="keypass" value="1qaz2wsx"/>
+	
+	
+	<target name="start_point" depends="sign-all-jars">
+		<echo>+---------------------------------------+</echo>
+		<echo level="info">幾種echo使用方式：${bin} </echo>
+		<echo message="${src}" level="info"/>
+		<echo>WebBrowser 建制方式
+				啟動。	</echo>
+    	<echo>+---------------------------------------+</echo>
+    	<echo>Change JAR File Name</echo>
+    	<!-- 方便上傳 -->
+    	<move file="${bin}/${ProjectJarFileName}" tofile="${bin}/${ProjectJarFileName}.tmp" />
+    	
+	</target>
+	
+	<target name="sign-all-jars" depends="buildJar">
+	    <echo>+---------------------------------------+</echo>
+	    <echo>               sign-all-jar              </echo>
+	    <echo>+---------------------------------------+</echo>
+	    <!--copy todir="${deploy.sign.dir}">
+	      <fileset dir="${deploy.app.dir}" includes="OratechEms.jar"/>               
+	    </copy>
+	    <copy todir="${deploy.sign.dir}">
+	      <fileset dir="${deploy.lib.dir}" includes="**/*.jar"/>               
+	    </copy-->
+	    <signjar
+	      alias="${alias}"
+	      storepass="${storepass}"
+	      keystore="${keystore}"
+	      keypass="${keypass}"
+	      jar="${bin}/${ProjectJarFileName}">
+	    </signjar>
+	</target>
+	
+	<target name="buildJar" depends="compile">
+		<echo>+---------------------------------------+</echo>
+		<echo> build Jar </echo>
+    	<echo>+---------------------------------------+</echo>
+    	
+    	<jar destfile="${bin}/${ProjectJarFileName}" basedir="${classes}" update="true"/>
+    	
+	</target>
+	
+	<target name="compile" depends="clean">
+		<echo>+---------------------------------------+</echo>
+		<echo> compile </echo>
+    	<echo>+---------------------------------------+</echo>
+    	
+    	<javac srcdir="${src}"
+			destdir="${classes}"
+         	fork="true"
+         	debug="on"
+         	encoding="UTF-8"
+         	includeAntRuntime="no"
+  		/>
+    	
+	</target>
+	
+	<target name="clean">
+		<echo>+---------------------------------------+</echo>
+		<echo> clean All File </echo>
+    	<echo>+---------------------------------------+</echo>
+    	<!-- remove jar file -->
+    	<delete file="${bin}/${ProjectJarFileName}" />
+    	
+    	<!-- remove classes -->
+    	<!-- includes="**/*" 要這樣設，才能remove all -->
+    	<delete includeEmptyDirs="true">
+			<fileset dir="${classes}" includes="**/*"/>
+		</delete>
+	</target>
+	
+</project>
