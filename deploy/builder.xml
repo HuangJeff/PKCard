@@ -23,7 +23,7 @@
 		<echo>+---------------------------------------+</echo>
 		<echo level="info">幾種echo使用方式：${bin} </echo>
 		<echo message="${src}" level="info"/>
-		<echo>WebBrowser 建制方式
+		<echo>${ProjectName} 建制方式
 				啟動。	</echo>
     	<echo>+---------------------------------------+</echo>
     	<echo>Change JAR File Name</echo>
@@ -72,7 +72,11 @@
          	encoding="UTF-8"
          	includeAntRuntime="no"
   		/>
-    	
+		<copy todir="${classes}">
+		  <fileset dir="${src}">
+		    <exclude name="**/*.java"/>
+		  </fileset>
+		</copy>
 	</target>
 	
 	<target name="clean">

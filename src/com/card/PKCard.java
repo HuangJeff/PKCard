@@ -60,7 +60,7 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * @param name : 格式是[1-10,1-1,1-2...]
 	 * @param spider : Spider
 	 */
-	public PKCard(String name, Spider spider) {
+	public PKCard(String name, Spider spider) throws Exception {
 		super();
 		String[] aryOfName = name.split("-");
 		this.type = Integer.parseInt(aryOfName[0]);
@@ -80,6 +80,7 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 			this.setIcon(this.getRearImage());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+			throw e;
 		}
 		
 		this.setSize(71, 96);

@@ -160,7 +160,11 @@ public class SpiderMenuBar extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("簡單..");
 				main.setGrade(Spider.EASY);
-				main.initCards();
+				try {
+					main.initCards();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 				main.newGame();
 			}
 		});
@@ -171,7 +175,11 @@ public class SpiderMenuBar extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("中級..");
 				main.setGrade(Spider.NATURAL);
-				main.initCards();
+				try {
+					main.initCards();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 				main.newGame();
 			}
 		});
@@ -182,7 +190,11 @@ public class SpiderMenuBar extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("困難..");
 				main.setGrade(Spider.HARD);
-				main.initCards();
+				try {
+					main.initCards();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 				main.newGame();
 			}
 		});

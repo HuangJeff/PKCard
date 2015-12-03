@@ -68,7 +68,7 @@ public class Spider extends JFrame {
 	/**
 	 * 
 	 */
-	public Spider() {
+	public Spider() throws Exception {
 		setTitle("新接龍");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//設定框架大小
@@ -178,7 +178,7 @@ public class Spider extends JFrame {
 	/**
 	 * 紙牌初始化
 	 */
-	public void initCards() {
+	public void initCards() throws Exception {
 		//如果是空的，初始化
 		if(cards == null)
 			cards = new PKCard[104]; //撲克牌52張(104 = 52 * 2)
@@ -592,8 +592,13 @@ public class Spider extends JFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				Spider sp = new Spider();
-				sp.setVisible(true);
+				Spider sp;
+				try {
+					sp = new Spider();
+					sp.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 	}
