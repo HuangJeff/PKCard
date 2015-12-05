@@ -99,11 +99,14 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		//先決定牌組圖片路徑(default:images內)
 		if(cardPic != 0) {
 			this.url = PKCard.class.getResource("../images_2/");
-			
+			System.out.println("this.url-images_2 = " + this.url);
 			this.cardFileExtension = ".png";
 		} else {
-			this.url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
+			//Eclipse上可RUN
+			//this.url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
+			this.url = ClassLoader.getSystemResource("com/images");
 			
+			System.out.println("this.url-images = " + this.url);
 			this.cardFileExtension = ".gif";
 		}
 	}
@@ -310,6 +313,8 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * @throws MalformedURLException 
 	 */
 	private ImageIcon getImageIcon(String fileName) throws MalformedURLException {
+		System.out.println("URL path =");
+		System.out.println(this.url.getPath());
 		return new ImageIcon(new URL(url, fileName));
 	}
 	
