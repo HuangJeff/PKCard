@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase="file:///E:/8.Eclipse Workspace/project01_workspace/PKCard/bin/" href="jnlpPKCard.jnlp">
+    <information>
+        <title>PKCard Demo</title>
+        <vendor>jeff</vendor>
+        <icon href="sometree-icon.jpg"/>
+        <offline-allowed/>
+	
+    </information>
+    
+    <security>
+	<all-permissions/>
+	<!--<j2ee-application-client-permissions/>-->
+    </security>
+    
+    <resources>
+        <!-- Application Resources -->
+	<j2se version="1.6+" href=
+           "http://java.sun.com/products/autodl/j2se"/>
+        <jar href="PKCard.jar"
+            main="true" />
+    </resources>
+    <application-desc
+         name="PKCard Application"
+         main-class="com.card.Spider"
+         width="300"
+         height="300">
+     </application-desc>
+     <update check="background"/>
+</jnlp>
