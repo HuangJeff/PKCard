@@ -26,7 +26,8 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 */
 	private static final long serialVersionUID = -1685847849234515380L;
 	/** IMG Folder URL */
-	private URL url;
+	//private URL url;
+	private String imgUrl;
 	//private static URL url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
 	//private final URL url = this.getClass().getResource("../images/"); //方法二
 	/** 實體檔案-牌卡背面檔名(rear.gif/rear.png) */
@@ -98,15 +99,18 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		int cardPic = this.main.getCardPicture();
 		//先決定牌組圖片路徑(default:images內)
 		if(cardPic != 0) {
-			this.url = PKCard.class.getResource("../images_2/");
-			System.out.println("this.url-images_2 = " + this.url);
+			//舊寫法-但只能於Eclipse上可RUN
+			//this.url = PKCard.class.getResource("../images_2/");
+			this.imgUrl = "com/images_2/";
+			//System.out.println("this.url-images_2 = " + this.url);
 			this.cardFileExtension = ".png";
 		} else {
-			//Eclipse上可RUN
+			//舊寫法-但只能於Eclipse上可RUN
 			//this.url = PKCard.class.getResource("../images/"); //相對路徑 (設成全域變數)
-			this.url = ClassLoader.getSystemResource("com/images");
 			
-			System.out.println("this.url-images = " + this.url);
+			this.imgUrl = "com/images/";
+			
+			//System.out.println("this.url-images = " + this.imgUrl);
 			this.cardFileExtension = ".gif";
 		}
 	}
@@ -313,9 +317,13 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 	 * @throws MalformedURLException 
 	 */
 	private ImageIcon getImageIcon(String fileName) throws MalformedURLException {
-		System.out.println("URL path =");
-		System.out.println(this.url.getPath());
-		return new ImageIcon(new URL(url, fileName));
+		//System.out.println("IMG URL path =" + this.imgUrl);
+		//System.out.println(this.url.getPath());
+		//舊寫法-無法在Jar中執行
+		//return new ImageIcon(new URL(url, fileName));
+		
+		return new ImageIcon(
+				getClass().getClassLoader().getResource(this.imgUrl + fileName));
 	}
 	
 	/**
