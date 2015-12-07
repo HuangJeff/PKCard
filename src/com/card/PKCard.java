@@ -234,7 +234,7 @@ public class PKCard extends JLabel implements MouseListener, MouseMotionListener
 		if(_a != -1) {
 			Point _p = this.main.getLastCardLocation(_a);
 			if(_p == null)
-				this.main.getGroundLabelLocation(_a);
+				_p = this.main.getGroundLabelLocation(_a);
 			_b = _y - _p.y;
 			if(_b <= -96 || _b >= 96) {
 				_a = -1;
